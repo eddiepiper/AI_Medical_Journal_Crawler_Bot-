@@ -9,9 +9,14 @@ services:
       - .env
     volumes:
       - .:/app
+      - medical_journal_data:/app/data
     networks:
       - bot-network
 
 networks:
   bot-network:
-    driver: bridge 
+    driver: bridge
+
+volumes:
+  medical_journal_data:
+    driver: local 

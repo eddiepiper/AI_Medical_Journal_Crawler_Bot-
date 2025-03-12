@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 from dotenv import load_dotenv
 import os
+from storage import ArticleStorage
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -15,22 +16,35 @@ class PubMedCrawler:
         load_dotenv()
         self.email = os.getenv('PUBMED_EMAIL', 'your-email@example.com')
         self.api_key = os.getenv('PUBMED_API_KEY')
+        self.storage = ArticleStorage()
+        
         Entrez.email = self.email
         if self.api_key:
             Entrez.api_key = self.api_key
 
-    def search_articles(self, query: str, max_results: int = 10) -> List[Dict]:
+    def search_articles(self, query: str, max_results: int = 10, use_cache: bool = True) -> List[Dict]:
         """
         Search PubMed for articles matching the query.
         
         Args:
             query (str): Search query
             max_results (int): Maximum number of results to return
+            use_cache (bool): Whether to check cached results first
             
         Returns:
             List[Dict]: List of article metadata
         """
         try:
+            # Log the search query
+            self.storage.log_search(query)
+            
+            # Check cache first if enabled
+            if use_cache:
+                cached_articles = self.storage.get_articles_by_query(query, max_results)
+                if cached_articles:
+                    logger.info(f"Found {len(cached_articles)} cached articles for query: {query}")
+                    return cached_articles
+
             # Search PubMed
             handle = Entrez.esearch(db="pubmed", term=query, retmax=max_results)
             record = Entrez.read(handle)
@@ -44,8 +58,17 @@ class PubMedCrawler:
             articles = []
             for pmid in record["IdList"]:
                 try:
+                    # Check if article is in cache
+                    cached_article = self.storage.get_article(pmid)
+                    if cached_article:
+                        articles.append(cached_article)
+                        continue
+
+                    # Fetch from PubMed if not in cache
                     article = self._fetch_article_details(pmid)
                     if article:
+                        # Store in database
+                        self.storage.store_article(article, query)
                         articles.append(article)
                     time.sleep(0.34)  # Respect NCBI's rate limit
                 except Exception as e:
@@ -137,4 +160,8 @@ class PubMedCrawler:
             return "Date not available"
         except Exception as e:
             logger.error(f"Error extracting publication date: {str(e)}")
-            return "Date not available" 
+            return "Date not available"
+
+    def get_recent_searches(self, limit: int = 10) -> List[Dict]:
+        """Get recent search queries."""
+        return self.storage.get_recent_searches(limit) 

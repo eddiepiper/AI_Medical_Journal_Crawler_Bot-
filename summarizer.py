@@ -76,20 +76,94 @@ class ArticleSummarizer:
             logger.error(f"Error summarizing article: {str(e)}")
             return "Error generating summary. Please try again later."
 
+    def answer_question(self, articles: List[Dict], question: str) -> str:
+        """
+        Answer a question based on the provided articles.
+        
+        Args:
+            articles (List[Dict]): List of articles to analyze
+            question (str): User's question
+            
+        Returns:
+            str: Answer based on the articles
+        """
+        try:
+            # Prepare the context from articles
+            context = "\n\n".join([
+                f"Article {i+1}:\nTitle: {article['title']}\n"
+                f"Authors: {', '.join(article['authors'])}\n"
+                f"Abstract: {article['abstract']}\n"
+                f"Published: {article['publication_date']}"
+                for i, article in enumerate(articles)
+            ])
+            
+            # Create prompt for question answering
+            prompt_template = """Based on the following medical research articles, please answer this question:
+
+Question: {question}
+
+Articles:
+{context}
+
+Please provide a comprehensive answer that:
+1. Synthesizes information from multiple articles
+2. Cites specific articles when making claims
+3. Acknowledges any limitations or contradictions
+4. Remains focused on the question asked
+
+Answer:"""
+            
+            prompt = PromptTemplate(
+                input_variables=["question", "context"],
+                template=prompt_template
+            )
+            
+            # Create documents for the chain
+            docs = self.text_splitter.create_documents([context])
+            
+            # Create and run the chain
+            chain = load_summarize_chain(
+                llm=self.llm,
+                chain_type="stuff",
+                prompt=prompt
+            )
+            
+            # Get the answer
+            answer = chain.run({
+                "input_documents": docs,
+                "question": question
+            })
+            
+            return answer.strip()
+            
+        except Exception as e:
+            logger.error(f"Error answering question: {str(e)}")
+            return "Error generating answer. Please try again later."
+
     def format_telegram_message(self, articles: List[Dict], query: str) -> str:
         """
         Format multiple articles into a literature review style message.
         
         Args:
             articles (List[Dict]): List of articles with their summaries
-            query (str): Original search query
+            query (str): Question or search query
             
         Returns:
             str: Formatted message for Telegram
         """
         try:
-            message = f"📚 *Literature Review: {query}*\n\n"
+            # Generate answer if it's a question
+            if "?" in query:
+                answer = self.answer_question(articles, query)
+                message = (
+                    f"📚 *Answer to: {query}*\n\n"
+                    f"{answer}\n\n"
+                    "Based on these articles:\n\n"
+                )
+            else:
+                message = f"📚 *Literature Review: {query}*\n\n"
             
+            # Add article references
             for i, article in enumerate(articles, 1):
                 authors = ", ".join(article['authors'][:3])
                 if len(article['authors']) > 3:
@@ -98,7 +172,6 @@ class ArticleSummarizer:
                 message += (
                     f"{i}. *{article['title']}*\n"
                     f"   {authors} ({article['publication_date']}) - {article['journal']}\n"
-                    f"   Key finding: {article.get('summary', 'No summary available')}\n"
                     f"   [Read Paper]({article['url']})\n\n"
                 )
             

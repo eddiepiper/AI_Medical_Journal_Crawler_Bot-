@@ -5,12 +5,16 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y gcc g++ && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
+# Create data directory for SQLite database
+RUN mkdir -p /app/data && \
+    chmod 777 /app/data
+
+# Copy requirements first for better caching
 COPY requirements.txt .
 
 # Install dependencies
