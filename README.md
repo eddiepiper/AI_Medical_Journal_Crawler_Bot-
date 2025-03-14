@@ -1,16 +1,18 @@
 # Medical Journal Crawler Bot 🤖
 
-A Telegram bot that provides concise literature reviews from PubMed articles using GPT-4 and BioBERT. The bot crawls medical journals, generates summaries, and delivers them in an easy-to-read format.
+A Telegram bot that provides comprehensive literature reviews from PubMed articles using GPT-4 and semantic search. The bot crawls medical journals, generates summaries, and delivers them in an easy-to-read format.
 
 ## ✨ Features
 
 - 🔍 **Smart PubMed Search**: Search medical research articles using natural language queries
-- 🤖 **AI-Powered Summaries**: Concise, one-sentence summaries of key findings using GPT-4
-- 📚 **Literature Review Format**: Clean, organized presentation of multiple articles
+- 🤖 **AI-Powered Analysis**: Comprehensive analysis of research findings using GPT-4
+- 📚 **Semantic Search**: Find relevant articles using natural language understanding
 - 🔄 **Real-time Updates**: Get the latest research as soon as it's published
 - 🌐 **Direct Paper Links**: Quick access to full papers on PubMed
 - 🛡️ **Rate Limiting**: Compliant with PubMed API guidelines
 - 🐳 **Docker Support**: Easy deployment with containerization
+- 💾 **Caching System**: Efficient storage and retrieval of article data
+- 🔎 **Advanced Filtering**: Filter results by date, journal, and relevance
 
 ## 🚀 Quick Start
 
@@ -45,28 +47,34 @@ A Telegram bot that provides concise literature reviews from PubMed articles usi
      /start - Initialize the bot
      /help  - Show usage instructions
      /search <query> - Search for medical articles
+     /ask <question> - Ask questions about the search results
      ```
    - Example searches:
      ```
-     /search AI in cardiology 2024
-     /search CRISPR cancer therapy
-     /search diabetes treatment advances
+     /search lymphoma treatment advances 2024
+     /search immunotherapy cancer
+     /search diabetes management
+     /ask what are the main findings about lymphoma?
      ```
 
 ## 📝 Example Output
 
 ```
-📚 Literature Review: AI in cardiology
+🔍 Search Results: Lymphoma Treatment
 
-1. *Title of the First Paper*
-   Authors et al. (2024) - Journal Name
-   Key finding: One-sentence summary of the main findings.
-   [Read Paper](https://pubmed.ncbi.nlm.nih.gov/...)
+1. *Lymphoma: The Added Value of Radiomics, Volumes and Global Disease Assessment*
+   Chauvie et al. (2024) - PET clinics
+   Key findings:
+   - Focuses on three prevalent subtypes: Hodgkin lymphoma, diffuse large B-cell lymphomas, and follicular lymphoma
+   - Emphasizes identifying high-risk individuals for personalized treatment
+   [Read Paper](https://pubmed.ncbi.nlm.nih.gov/38910057/)
 
-2. *Title of the Second Paper*
-   Authors et al. (2024) - Journal Name
-   Key finding: One-sentence summary of the main findings.
-   [Read Paper](https://pubmed.ncbi.nlm.nih.gov/...)
+2. *Lymphoma for the acute physician: diagnostic challenges and initial treatment decisions*
+   Henderson et al. (2024) - British journal of hospital medicine
+   Key findings:
+   - Covers emergency presentations and novel treatment options
+   - Discusses tumor lysis syndrome and mediastinal mass management
+   [Read Paper](https://pubmed.ncbi.nlm.nih.gov/38941979/)
 ```
 
 ## 🏗️ Project Structure
@@ -80,7 +88,9 @@ medical-journal-crawler/
 ├── main.py                # Application entry point
 ├── pubmed_crawler.py      # PubMed API integration
 ├── summarizer.py          # GPT-4 summarization logic
-└── telegram_bot.py        # Telegram bot implementation
+├── telegram_bot.py        # Telegram bot implementation
+├── vector_store.py        # Vector database for semantic search
+└── test_crawler.py        # Test suite for crawler functionality
 ```
 
 ## 🛠️ Development
@@ -122,7 +132,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [OpenAI GPT-4](https://openai.com/gpt-4)
 - [python-telegram-bot](https://python-telegram-bot.org/)
 - [LangChain](https://www.langchain.com/)
-- [BioBERT](https://github.com/dmis-lab/biobert)
+- [Sentence Transformers](https://www.sbert.net/)
 
 ## 📞 Support
 
