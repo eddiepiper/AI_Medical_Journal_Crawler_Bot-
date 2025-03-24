@@ -33,6 +33,8 @@ env/
 
 # Environment variables
 .env
+.env.*
+!.env.template
 
 # OS
 .DS_Store
@@ -50,4 +52,9 @@ Thumbs.db
 .docker/
 
 # Backup files
-backup*/ 
+backup*/
+
+# Data files
+data/
+*.pkl
+*.bin 
